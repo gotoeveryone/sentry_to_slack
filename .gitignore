@@ -13,3 +13,23 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# OS genrated files
+Thumbs.db
+.DS_Store
+
+# log
+*.log
+
+# VSCode
+/.vscode/*
+!/.vscode/extensions.json
+
+# asdf
+.tool-versions
+
+# dotenv
+.env
+
+# Output directory of binary
+/tmp
