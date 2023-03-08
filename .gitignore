@@ -27,9 +27,3 @@ Thumbs.db
 
 # asdf
 .tool-versions
-
-# dotenv
-.env
-
-# Output directory of binary
-/tmp

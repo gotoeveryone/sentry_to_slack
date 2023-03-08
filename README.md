@@ -1,20 +1,13 @@
 # Sentry to Slack
 
-Sentry のデータを Slack に連携するためのツール
+Sentry のデータを Slack に連携するための関数群
 
 ## Requirements
 
-- Docker
+- Go 1.19+
 
-## Run
+## Environment Variables
 
-```console
-$ cp .env.example .env
-$ docker compose up
-```
-
-## Post data
-
-```console
-$ curl -X POST -d '{"url":"https://test.example.com","event":{"title":"TestError","level":"error","environment": "test"}}' http://localhost:8080
-```
+- SLACK_API_TOKEN: Slack の API トークン
+- SLACK_CHANNEL: 通知先のチャンネル
+- TAGS: 通知に利用したいタグをカンマ区切りで定義 (例: `server_name,environment`)
