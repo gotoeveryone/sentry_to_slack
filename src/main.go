@@ -15,57 +15,6 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-type SentryEventMetadata struct {
-	Filename string `json:"filename"`
-	Function string `json:"function"`
-}
-
-type SentryEvent struct {
-	Title       string              `json:"title"`
-	Culprit     string              `json:"culprit"`
-	Environment string              `json:"environment"`
-	Tags        [][]string          `json:"tags"`
-	Metadata    SentryEventMetadata `json:"metadata"`
-}
-
-type Event struct {
-	Url     string      `json:"url"`
-	Project string      `json:"project"`
-	Level   string      `json:"level"`
-	Event   SentryEvent `json:"event"`
-}
-
-func (e *Event) Color() string {
-	switch e.Level {
-	case "error":
-		return "#ff7738"
-	case "warning":
-		return "#b28000"
-	case "info":
-		return "#3070e8"
-	default:
-		return ""
-	}
-}
-
-// Slack へリクエストするための構造体
-type Request struct {
-	Channel     string              `json:"channel"`
-	Attachments []RequestAttachment `json:"attachments"`
-}
-
-type RequestAttachment struct {
-	Title  string         `json:"title"`
-	Color  string         `json:"color"`
-	Fields []RequestField `json:"fields"`
-}
-
-type RequestField struct {
-	Title string `json:"title"`
-	Value string `json:"value"`
-	Short bool   `json:"short"`
-}
-
 func sendToSlack(r Request) (*http.Response, error) {
 	body, err := json.Marshal(r)
 	if err != nil {
@@ -85,13 +34,8 @@ func sendToSlack(r Request) (*http.Response, error) {
 	return res, nil
 }
 
-func HandleRequest(ctx context.Context, request events.LambdaFunctionURLRequest) (string, error) {
-	var e Event
-	if err := json.Unmarshal([]byte(request.Body), &e); err != nil {
-		return "error", err
-	}
-	log.Printf("An error has occurred [%s]: %s", e.Event.Environment, e.Event.Title)
-	p := Request{
+func createRequest(e Event) Request {
+	req := Request{
 		Channel: os.Getenv("SLACK_CHANNEL"),
 		Attachments: []RequestAttachment{
 			{
@@ -114,15 +58,25 @@ func HandleRequest(ctx context.Context, request events.LambdaFunctionURLRequest)
 				continue
 			}
 			key := t[0]
-			if key != tag {
+			if key != strings.TrimSpace(tag) {
 				continue
 			}
 			value := t[1]
-			p.Attachments[0].Fields = append(p.Attachments[0].Fields, RequestField{Title: key, Value: value, Short: true})
+			req.Attachments[0].Fields = append(req.Attachments[0].Fields, RequestField{Title: key, Value: value, Short: true})
 		}
 	}
 
-	res, err := sendToSlack(p)
+	return req
+}
+
+func HandleRequest(ctx context.Context, request events.LambdaFunctionURLRequest) (string, error) {
+	var e Event
+	if err := json.Unmarshal([]byte(request.Body), &e); err != nil {
+		return "error", err
+	}
+	log.Printf("An error has occurred [%s]: %s", e.Event.Environment, e.Event.Title)
+	req := createRequest(e)
+	res, err := sendToSlack(req)
 	if err != nil {
 		return "error", err
 	}
