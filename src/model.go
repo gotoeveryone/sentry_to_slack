@@ -1,4 +1,4 @@
-package main
+package app
 
 type Event struct {
 	Url     string      `json:"url"`

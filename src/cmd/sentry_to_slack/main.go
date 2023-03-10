@@ -13,9 +13,11 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+
+	app "github.com/gotoeveryone/sentry_to_slack/src"
 )
 
-func sendToSlack(r Request) (*http.Response, error) {
+func sendToSlack(r app.Request) (*http.Response, error) {
 	body, err := json.Marshal(r)
 	if err != nil {
 		return nil, err
@@ -34,17 +36,17 @@ func sendToSlack(r Request) (*http.Response, error) {
 	return res, nil
 }
 
-func createRequest(e Event) Request {
-	req := Request{
+func createRequest(e app.Event) app.Request {
+	req := app.Request{
 		Channel: os.Getenv("SLACK_CHANNEL"),
-		Attachments: []RequestAttachment{
+		Attachments: []app.RequestAttachment{
 			{
 				Title: fmt.Sprintf("<%s|%s>",
 					e.Url,
 					e.Event.Title,
 				),
 				Color: e.Color(),
-				Fields: []RequestField{
+				Fields: []app.RequestField{
 					{Title: "", Value: e.Event.Culprit},
 				},
 			},
@@ -62,7 +64,7 @@ func createRequest(e Event) Request {
 				continue
 			}
 			value := t[1]
-			req.Attachments[0].Fields = append(req.Attachments[0].Fields, RequestField{Title: key, Value: value, Short: true})
+			req.Attachments[0].Fields = append(req.Attachments[0].Fields, app.RequestField{Title: key, Value: value, Short: true})
 		}
 	}
 
@@ -70,7 +72,7 @@ func createRequest(e Event) Request {
 }
 
 func HandleRequest(ctx context.Context, request events.LambdaFunctionURLRequest) (string, error) {
-	var e Event
+	var e app.Event
 	if err := json.Unmarshal([]byte(request.Body), &e); err != nil {
 		return "error", err
 	}
