@@ -4,7 +4,7 @@ Sentry のデータを Slack に連携するための関数群
 
 ## Requirements
 
-- Go 1.19+
+- Go 1.23+
 
 ## Environment Variables
 
