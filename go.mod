@@ -1,6 +1,6 @@
 module github.com/gotoeveryone/sentry_to_slack
 
-go 1.19
+go 1.23
 
 require github.com/stretchr/testify v1.9.0
 

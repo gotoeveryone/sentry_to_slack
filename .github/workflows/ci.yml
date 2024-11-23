@@ -7,23 +7,14 @@ jobs:
     name: CI
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.19
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        id: cache
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.OS }}-1.19-${{ hashFiles('**/go.sum') }}
-
-      - name: Get dependencies
-        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
-        run: go mod download
+          go-version: "1.23"
+          cache-dependency-path: |
+            **/go.sum
 
       - name: Run vet
         run: go vet ./...
